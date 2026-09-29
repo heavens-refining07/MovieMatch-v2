@@ -14,9 +14,11 @@ AVATAR_COLORS = [
 ]
 
 class Room:
-    def __init__(self, code: str, host_id: str, host_name: str):
+    def __init__(self, code: str, host_id: str, host_name: str, owner_id: str, record_id: str):
         self.code: str = code
         self.host_id: str = host_id
+        self.owner_id: str = owner_id
+        self.record_id: str = record_id
         self.state: str = "lobby"  # "lobby", "voting", "results"
         self.filters: RoomFilter = RoomFilter()
         self.participants: Dict[str, Participant] = {}
@@ -39,7 +41,9 @@ class Room:
             is_connected=True
         )
 
-    def add_connection(self, user_id: str, ws: WebSocket, name: Optional[str] = None):
+    def add_connection(self, user_id: str, ws: WebSocket, name: Optional[str] = None, is_host: bool = False):
+        if user_id == self.host_id and not is_host:
+            raise ValueError("Host identity requires an authenticated host token.")
         self.connections[user_id] = ws
         if user_id in self.participants:
             self.participants[user_id].is_connected = True
@@ -50,7 +54,7 @@ class Room:
             self.participants[user_id] = Participant(
                 id=user_id,
                 name=name or f"Player {len(self.participants) + 1}",
-                is_host=(user_id == self.host_id),
+                is_host=is_host,
                 avatar_color=color,
                 is_connected=True
             )
@@ -207,8 +211,8 @@ class Room:
             "code": self.code,
             "host_id": self.host_id,
             "state": self.state,
-            "filters": self.filters.dict(),
-            "participants": [p.dict() for p in self.participants.values()]
+            "filters": self.filters.model_dump(),
+            "participants": [p.model_dump() for p in self.participants.values()]
         }
 
 class RoomManager:
@@ -222,10 +226,16 @@ class RoomManager:
                 return code
         return str(random.randint(1000, 9999))
 
-    def create_room(self, host_name: str, host_id: Optional[str] = None) -> tuple[Room, str]:
+    def create_room(self, host_name: str, owner_id: str, record_id: str) -> tuple[Room, str]:
         code = self.generate_code()
-        uid = host_id or "".join(random.choices(string.ascii_lowercase + string.digits, k=8))
-        room = Room(code=code, host_id=uid, host_name=host_name)
+        uid = f"host_{owner_id}"
+        room = Room(
+            code=code,
+            host_id=uid,
+            host_name=host_name,
+            owner_id=owner_id,
+            record_id=record_id,
+        )
         self.rooms[code] = room
         return room, uid
 

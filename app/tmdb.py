@@ -11,12 +11,16 @@ from app.models import MovieItem, RoomFilter
 
 logger = logging.getLogger(__name__)
 
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "845bec6c276b668f4048ae57ddb1e541")
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
 BASE_URL = "https://api.themoviedb.org/3"
 IMG_BASE = "https://image.tmdb.org/t/p/w500"
 BACKDROP_BASE = "https://image.tmdb.org/t/p/w1280"
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+
+def is_configured() -> bool:
+    return bool(TMDB_API_KEY)
 
 GENRES_BY_ID: Dict[int, str] = {
     28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
@@ -69,6 +73,9 @@ def _ssl_ctx() -> ssl.SSLContext:
 
 def _tmdb_get(endpoint: str, params: Dict[str, str]) -> Optional[Dict]:
     """Synchronous urllib call to TMDB. Returns parsed JSON or None on error."""
+    if not TMDB_API_KEY:
+        logger.warning("TMDB request skipped because TMDB_API_KEY is not configured.")
+        return None
     params.setdefault("language", "en-US")
     url = f"{BASE_URL}/{endpoint}?" + urllib.parse.urlencode(params)
     try:

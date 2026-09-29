@@ -11,8 +11,8 @@ class MovieItem(BaseModel):
     vote_average: float = 0.0
     vote_count: int = 0
     overview: str = ''
-    genres: List[str] = []
-    providers: List[str] = []
+    genres: List[str] = Field(default_factory=list)
+    providers: List[str] = Field(default_factory=list)
     runtime: Optional[int] = None
 
 class Participant(BaseModel):
@@ -27,8 +27,8 @@ class Participant(BaseModel):
 
 class RoomFilter(BaseModel):
     region: str = 'IN'
-    provider_ids: List[int] = []
-    genre_ids: List[int] = []
+    provider_ids: List[int] = Field(default_factory=list)
+    genre_ids: List[int] = Field(default_factory=list)
     min_rating: float = 6.0
     year_from: Optional[int] = None
     year_to: Optional[int] = None
@@ -40,12 +40,12 @@ class LeaderboardItem(BaseModel):
     dislikes: int
     total_votes: int
     percentage: int
-    voters: List[str] = []
+    voters: List[str] = Field(default_factory=list)
 
 class GameResult(BaseModel):
     winner: MovieItem
     is_tie_break: bool = False
-    tied_candidates: List[MovieItem] = []
+    tied_candidates: List[MovieItem] = Field(default_factory=list)
     total_voters: int = 0
     max_likes: int = 0
-    leaderboard: List[LeaderboardItem] = []
+    leaderboard: List[LeaderboardItem] = Field(default_factory=list)
