@@ -2,8 +2,12 @@
 *.py[cod]
 *$py.class
 .env
+*.db
+*.sqlite
+*.sqlite3
 venv/
 env/
+.venv/
 .idea/
 .vscode/
 *.log

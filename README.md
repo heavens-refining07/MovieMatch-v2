@@ -1,52 +1,81 @@
-# 🎬 Movie Match (Movie Tinder)
+# MovieMatch
 
-A real-time, interactive web application that allows friends to swipe on movies together like Tinder and find a mutual movie match instantly.
+MovieMatch is a mobile-first group movie picker. A signed-in host creates a room, guests join with a four-digit code or link and a nickname, everyone swipes, and the app ranks the group's favorites in real time.
 
----
+## What changed in v2
 
-## 🛠️ Tech Stack
+- Host-only accounts and server-side sessions. Guests never create accounts.
+- Authenticated room ownership and signed room connection passes; browser-controlled IDs no longer grant host powers.
+- Host dashboard with room history and reusable filter presets.
+- Persistent SQLite data locally, configurable for Postgres in deployment.
+- A redesigned responsive interface for joining, hosting, lobbies, swiping, and results.
+- No API keys in source code or documentation.
 
-* **Backend:** Python 3.10+, FastAPI, WebSockets, Uvicorn
-* **Frontend:** HTML5, CSS3, JavaScript (Vanilla ES6)
-* **External API:** TMDB (The Movie Database) API for movie metadata and genres
-* **Containerization:** Docker
-* **Deployment:** Render
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the data model, security boundaries, flows, and rollout plan.
 
----
+## Security notice
 
-## ✨ Features
+An earlier revision exposed a TMDB API key in both `app/tmdb.py` and `README.md`. Removing it from the current branch does **not** make that key private because it remains in Git history. Revoke or rotate it in TMDB immediately, store the replacement only as a deployment secret, and consider rewriting repository history if required by your security policy.
 
-* **Real-time Syncing:** Instant room creation and live voting updates using WebSockets.
-* **Movie Discovery:** Background movie caching and genre filtering powered by TMDB API.
-* **Instant Match Alert:** Notifies room members immediately when a mutual match is made.
+Never commit `.env`, database files, session secrets, or API keys.
 
----
+## Local setup
 
-## 🚀 Free Deployment on Render (Step-by-Step)
+```bash
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+```
 
-Render provides free web hosting with native Docker and WebSocket support.
+Set these values in your environment (the app does not automatically load `.env`):
 
-### Step 1: Push Code to GitHub
-Ensure all project files and directories are present in your repository:
-* `app/`
-* `static/`
-* `Dockerfile`
-* `requirements.txt`
-* `Procfile`
-* `run.py`
+```text
+APP_SECRET_KEY=<long random value>
+TMDB_API_KEY=<new rotated key>
+DATABASE_URL=sqlite:///./moviematch.db
+COOKIE_SECURE=false
+```
 
-### Step 2: Deploy on Render
-1. Go to [Render Dashboard](https://dashboard.render.com) and sign in with GitHub.
-2. Click **New +** in the top navigation bar and select **Web Service**.
-3. Select and connect your **Test-1** GitHub repository.
-4. Set configuration parameters:
-   * **Runtime:** Docker
-   * **Instance Type:** Free ($0 / month)
-   * **Health Check Path:** Leave blank or set to `/`
-5. Under **Environment Variables**, add:
-   * `TMDB_API_KEY`: `845bec6c276b668f4048ae57ddb1e541`
-   * `ENVIRONMENT`: `production`
-6. Click **Deploy Web Service**.
+Run the app:
 
-### Step 3: Share Live Link
-Within 1–2 minutes, Render will assign your app a live URL (e.g., `https://movie-tinder.onrender.com`). Share this URL with friends on any desktop or mobile browser!
+```bash
+uvicorn app.main:app --reload
+```
+
+Open `http://127.0.0.1:8000`.
+
+## Deployment
+
+For Render or another HTTPS host:
+
+- Set `ENVIRONMENT=production`.
+- Set `APP_SECRET_KEY` to a long random secret; startup intentionally fails without it in production.
+- Set `TMDB_API_KEY` to a newly rotated key.
+- Set `COOKIE_SECURE=true`.
+- Use a managed Postgres URL for `DATABASE_URL`; `postgres://` and `postgresql://` URLs are normalized for `psycopg`.
+- Set `ALLOWED_ORIGINS` only if the frontend is hosted on a different origin.
+
+SQLite is ideal for local development. A single-instance deployment can use a persistent disk, but Postgres is recommended for production durability and horizontal scaling.
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+The API tests cover registration/login, session revocation, preset persistence, authenticated room creation, account-free guest joining, and rejection of host-token use without a host session.
+
+## Current architecture
+
+- **Backend:** FastAPI, WebSockets, SQLAlchemy
+- **Data:** SQLite by default; Postgres through `DATABASE_URL`
+- **Frontend:** semantic HTML, responsive CSS, vanilla JavaScript
+- **Movies:** TMDB discovery and metadata
+- **Authentication:** opaque random server sessions in HttpOnly cookies, scrypt password hashing
+- **Realtime authorization:** signed, room-scoped connection passes plus an authenticated host session for host role
+
+## Operational note
+
+Active WebSocket room state remains in process memory to preserve the existing architecture. Durable room metadata, presets, and results are stored in the database. A later scaling phase should move live room coordination to Redis before running multiple application replicas.
