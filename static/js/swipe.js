@@ -2,6 +2,18 @@
  * MovieMatch Swipe Physics Controller
  * Handles touch gestures, mouse dragging, stamp opacities, and swipe animations.
  */
+function cardEscape(value) {
+  const node = document.createElement("span");
+  node.textContent = value ?? "";
+  return node.innerHTML;
+}
+
+function safePosterUrl(value) {
+  return typeof value === "string" && value.startsWith("https://")
+    ? value
+    : "https://placehold.co/500x750/181824/f6f3ff?text=No+Poster";
+}
+
 class CardSwipeController {
   constructor(container, onSwipeCallback) {
     this.container = container;
@@ -54,19 +66,19 @@ class CardSwipeController {
       }
 
       cardEl.innerHTML = `
-        <img class="movie-poster-img" src="${movie.poster_path || 'https://via.placeholder.com/500x750?text=No+Poster'}" alt="${movie.title}" loading="lazy" />
+        <img class="movie-poster-img" src="${safePosterUrl(movie.poster_path)}" alt="${cardEscape(movie.title)}" loading="lazy" />
         <div class="card-gradient-overlay"></div>
         <div class="stamp stamp-like">LIKE</div>
         <div class="stamp stamp-nope">NOPE</div>
         <div class="card-content">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span class="badge badge--rating">⭐ ${movie.vote_average.toFixed(1)}</span>
-            <span class="text-caption" style="color: rgba(255,255,255,0.8);">${movie.release_year || ''}</span>
+            <span class="text-caption" style="color: rgba(255,255,255,0.8);">${cardEscape(movie.release_year || '')}</span>
           </div>
-          <h2 class="card-title">${movie.title}</h2>
+          <h2 class="card-title">${cardEscape(movie.title)}</h2>
           <div class="card-tags-row">
-            ${(movie.genres || []).map(g => `<span class="tag">${g}</span>`).join('')}
-            ${(movie.providers || []).map(p => `<span class="tag tag--provider">${p}</span>`).join('')}
+            ${(movie.genres || []).map(g => `<span class="tag">${cardEscape(g)}</span>`).join('')}
+            ${(movie.providers || []).map(p => `<span class="tag tag--provider">${cardEscape(p)}</span>`).join('')}
           </div>
         </div>
       `;
