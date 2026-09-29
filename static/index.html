@@ -1,249 +1,116 @@
-﻿<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MovieMatch — Group Movie Decision Platform</title>
-  <!-- Google Fonts: Inter -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#09090f">
+  <title>MovieMatch — Decide together</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+  <div class="ambient ambient--one"></div><div class="ambient ambient--two"></div>
+  <nav class="topbar">
+    <button class="brand" id="brand-home" type="button" aria-label="MovieMatch home"><span class="brand-mark">M</span><span>MovieMatch</span></button>
+    <div class="topbar-actions">
+      <button class="button button--quiet" id="nav-join" type="button">Join a room</button>
+      <button class="button button--small" id="nav-host" type="button">Host sign in</button>
+      <button class="button button--quiet hidden" id="nav-dashboard" type="button">Dashboard</button>
+    </div>
+  </nav>
 
-  <main id="app-container">
-    
-    <!-- 1. HOME SCREEN -->
-    <section id="screen-home" class="screen active">
-      <header class="brand-header">
-        <span class="brand-icon" aria-hidden="true">🍿</span>
-        <h1 class="brand-title">MovieMatch</h1>
-      </header>
-      <p class="text-subtitle" style="text-align: center; margin-bottom: var(--space-24);">
-        Swipe with friends, eliminate decision fatigue, and find the perfect movie to watch together.
-      </p>
-
-      <div class="card card--hero">
-        <div class="form-group">
-          <label class="form-label" for="user-name-input">Your Nickname</label>
-          <div class="form-input-row">
-            <input type="text" id="user-name-input" class="form-input" placeholder="e.g. Cinephile" maxlength="18" autocomplete="nickname" />
-            <button id="btn-random-name" class="btn btn--icon" title="Generate Random Name" type="button" aria-label="Generate Random Name">🎲</button>
-          </div>
-        </div>
-
-        <button id="btn-create-room" class="btn btn--primary" type="button">
-          Create Group Room
-        </button>
+  <main class="app-shell">
+    <section class="screen active" id="screen-welcome">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="live-dot"></span> The group movie picker</span>
+        <h1>Less debating.<br><span>More watching.</span></h1>
+        <p>One host sets the vibe. Everyone swipes. MovieMatch finds the film your whole group can get behind.</p>
+        <div class="trust-row"><span>No guest accounts</span><span>Live group progress</span><span>One clear winner</span></div>
       </div>
-
-      <div class="divider">or join with code</div>
-
-      <div class="card">
-        <div class="form-group">
-          <label class="form-label" for="join-code-input">4-Digit Room Code</label>
-          <input type="text" id="join-code-input" class="form-input form-input--code" placeholder="0000" maxlength="4" inputmode="numeric" />
-        </div>
-        <button id="btn-join-room" class="btn btn--secondary" type="button">
-          Join Existing Room
-        </button>
+      <div class="entry-grid">
+        <article class="panel panel--join">
+          <div class="panel-icon">↗</div><p class="kicker">Joining friends?</p>
+          <h2>Enter the room</h2><p class="muted">All you need is a code and a nickname.</p>
+          <form id="join-form" class="form-stack">
+            <label>Room code<input id="join-code" inputmode="numeric" autocomplete="one-time-code" maxlength="4" placeholder="4-digit code" required></label>
+            <label>Nickname<input id="join-name" maxlength="24" autocomplete="nickname" placeholder="How friends know you" required></label>
+            <button class="button button--primary button--wide" type="submit">Join room <span>→</span></button>
+          </form>
+        </article>
+        <article class="panel panel--host">
+          <div class="panel-icon">★</div><p class="kicker">Planning movie night?</p>
+          <h2>Host the room</h2><p class="muted">Sign in to create rooms, save presets, and revisit every winner.</p>
+          <ul class="feature-list"><li>Reusable streaming and genre presets</li><li>Secure host-only room controls</li><li>Room history and past winners</li></ul>
+          <button class="button button--wide" id="welcome-host" type="button">Open host dashboard <span>→</span></button>
+        </article>
       </div>
     </section>
 
-    <!-- 2. LOBBY SCREEN -->
-    <section id="screen-lobby" class="screen">
-      <header class="brand-header" style="margin-top: 0;">
-        <span class="brand-icon" aria-hidden="true">🎬</span>
-        <h1 class="title-section">Movie Lobby</h1>
-      </header>
-
-      <div class="room-code-card">
-        <span class="room-code-label">Room Code</span>
-        <div id="lobby-room-code" class="room-code-display">----</div>
-        <div class="room-actions-row">
-          <button id="btn-copy-code" class="btn btn--ghost room-action-btn" type="button">📋 Copy Link</button>
-          <button id="btn-share-room" class="btn btn--ghost room-action-btn" type="button">📤 Share</button>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <span class="section-label">Connected Friends</span>
-        <span id="lobby-player-count" class="text-caption"></span>
-      </div>
-      <div id="lobby-players-list" class="player-list">
-        <!-- Dynamically rendered -->
-      </div>
-
-      <div class="section-header">
-        <span class="section-label">Selected Filters</span>
-      </div>
-      <div id="lobby-filter-summary" class="summary-container">
-        <!-- Dynamically rendered -->
-      </div>
-
-      <div style="margin-top: auto; padding-top: var(--space-12);">
-        <button id="btn-start-game" class="btn btn--primary" type="button" style="display: none;">
-          Start Swiping
-        </button>
-        <div id="lobby-waiting-msg" class="text-subtitle" style="display: none; text-align: center; padding: var(--space-12);">
-          Waiting for the host to start...
-        </div>
+    <section class="screen screen--narrow" id="screen-auth">
+      <button class="back-link" data-screen="welcome" type="button">← Back</button>
+      <div class="auth-card">
+        <span class="eyebrow">For hosts</span><h1 id="auth-title">Welcome back</h1><p class="muted" id="auth-copy">Sign in to create and manage movie rooms.</p>
+        <div class="segmented"><button class="active" id="tab-login" type="button">Sign in</button><button id="tab-register" type="button">Create account</button></div>
+        <form id="auth-form" class="form-stack">
+          <label class="register-only hidden">Display name<input id="auth-name" maxlength="60" autocomplete="name" placeholder="Alex"></label>
+          <label>Email<input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+          <label>Password<input id="auth-password" type="password" autocomplete="current-password" placeholder="At least 10 characters" required></label>
+          <p class="form-error hidden" id="auth-error"></p>
+          <button class="button button--primary button--wide" id="auth-submit" type="submit">Sign in</button>
+        </form>
+        <p class="privacy-note">Guest players never need an account. Host sessions use a secure, HttpOnly cookie.</p>
       </div>
     </section>
 
-    <!-- 3. VOTING ARENA SCREEN -->
-    <section id="screen-voting" class="screen">
-      <div class="arena-header">
-        <div id="deck-progress-badge" class="arena-badge">Card 1 / 15</div>
-        <div id="friends-status-badge" class="text-caption" style="font-weight: 600; color: var(--color-info);">Friends voting...</div>
+    <section class="screen" id="screen-dashboard">
+      <header class="dashboard-head"><div><span class="eyebrow">Host dashboard</span><h1>Ready for movie night, <span id="dashboard-name">Host</span>?</h1></div><button class="button button--quiet" id="btn-logout" type="button">Sign out</button></header>
+      <div class="dashboard-grid">
+        <article class="panel create-panel"><div class="panel-heading"><div><p class="kicker">New session</p><h2>Create a room</h2></div><span class="step-pill">01</span></div>
+          <form id="create-room-form" class="form-stack">
+            <label>Room title<input id="room-title" maxlength="100" value="Friday movie night" required></label>
+            <label>Preset<select id="room-preset"><option value="">Fresh settings</option></select></label>
+            <button class="button button--primary button--wide" type="submit">Create room <span>→</span></button>
+          </form>
+        </article>
+        <article class="panel"><div class="panel-heading"><div><p class="kicker">Saved setups</p><h2>Room presets</h2></div><button class="button button--small" id="btn-new-preset" type="button">+ New</button></div><div id="preset-list" class="stack-list empty-state">No presets yet.</div></article>
       </div>
+      <section class="history-section"><div class="section-heading"><div><p class="kicker">Your archive</p><h2>Room history</h2></div><span class="muted" id="history-count">0 sessions</span></div><div class="history-list" id="history-list"><div class="empty-state">Your completed movie nights will appear here.</div></div></section>
+    </section>
 
-      <div id="card-stack-container" class="card-stack">
-        <!-- Tinder Swipe Cards rendered dynamically -->
-      </div>
-
-      <div id="action-buttons-bar" class="action-bar">
-        <button id="btn-vote-nope" class="action-circle-btn action-circle-btn--nope" type="button" title="Pass (Swipe Left)" aria-label="Pass">✕</button>
-        <button id="btn-card-info" class="action-circle-btn action-circle-btn--info" type="button" title="View Movie Details" aria-label="View Movie Details">ℹ</button>
-        <button id="btn-vote-like" class="action-circle-btn action-circle-btn--like" type="button" title="Like (Swipe Right)" aria-label="Like">♥</button>
-      </div>
-
-      <!-- WAITING CONTAINER WHEN USER FINISHES DECK -->
-      <div id="waiting-box" class="waiting-container">
-        <div class="waiting-spinner" aria-hidden="true">🍿</div>
-        <h2 class="title-section" style="margin-bottom: var(--space-8);">All Swiped!</h2>
-        <p class="text-subtitle" style="max-width: 280px; margin-bottom: var(--space-24);">
-          Waiting for your friends to finish swiping through their cards...
-        </p>
-        <button id="btn-force-results" class="btn btn--secondary" type="button" style="display: none; max-width: 260px;">
-          End Voting & Show Winner
-        </button>
+    <section class="screen" id="screen-lobby">
+      <header class="room-head"><div><span class="eyebrow">Live lobby</span><h1 id="lobby-title">Movie night</h1></div><button class="button button--quiet" id="btn-leave" type="button">Leave</button></header>
+      <div class="lobby-grid">
+        <div class="lobby-main">
+          <article class="code-card"><p>Invite friends with</p><button id="room-code" type="button" title="Copy join link">••••</button><div class="code-actions"><button class="button button--small" id="btn-copy" type="button">Copy link</button><button class="button button--small" id="btn-share" type="button">Share</button></div></article>
+          <article class="panel"><div class="section-heading"><h2>People in the room</h2><span class="status-pill" id="player-count">1 connected</span></div><div id="player-list" class="player-list"></div></article>
+        </div>
+        <aside class="panel settings-panel"><div class="panel-heading"><div><p class="kicker">Tonight’s vibe</p><h2>Room settings</h2></div><button class="button button--small host-only" id="btn-edit-filters" type="button">Edit</button></div><div id="filter-summary" class="summary-grid"></div><div class="host-only lobby-cta"><button class="button button--primary button--wide" id="btn-start" type="button">Start swiping <span>→</span></button></div><p class="guest-only waiting-copy">The host is choosing the lineup. You’ll start together.</p></aside>
       </div>
     </section>
 
-    <!-- 4. RESULTS SCREEN -->
-    <section id="screen-results" class="screen">
-      <div class="results-header">
-        <div id="winner-tie-badge" class="badge badge--rating" style="display: none; margin-bottom: var(--space-8);">
-          🎲 Resolved by Random Tie-Breaker
-        </div>
-        <h2 class="title-display">Group Winner!</h2>
-      </div>
-
-      <div class="winner-card-container">
-        <img id="winner-poster-img" class="winner-poster" src="" alt="Winner Poster" />
-        <div class="winner-body">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
-            <span id="winner-movie-rating" class="badge badge--rating">⭐ 8.5</span>
-            <span id="winner-movie-year" class="text-caption">2024</span>
-          </div>
-          <h3 id="winner-movie-title" class="title-section" style="margin: var(--space-4) 0;">Movie Title</h3>
-          <div id="winner-genres" class="text-caption" style="margin-bottom: var(--space-12);"></div>
-          
-          <div id="winner-votes-stat" class="stat-banner">
-            Liked by 3 of 3 friends (100%)
-          </div>
-
-          <p id="winner-movie-overview" class="text-subtitle" style="font-size: var(--font-size-caption); max-height: 80px; overflow-y: auto;">
-            Overview synopsis...
-          </p>
-        </div>
-      </div>
-
-      <div class="section-header">
-        <span class="section-label">Full Ranking Breakdown</span>
-      </div>
-      <div id="results-leaderboard-list" class="leaderboard-list">
-        <!-- Full Leaderboard populated dynamically -->
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: var(--space-8); margin-top: auto; padding-top: var(--space-12);">
-        <button id="btn-restart-game" class="btn btn--primary" type="button" style="display: none;">
-          Start New Round
-        </button>
-        <button id="btn-leave-room" class="btn btn--ghost" type="button">
-          Leave Room
-        </button>
-      </div>
+    <section class="screen screen--game" id="screen-voting">
+      <header class="game-head"><span class="status-pill" id="deck-progress">1 / 15</span><span class="eyebrow">Swipe your picks</span><span class="status-pill" id="friends-progress">0 finished</span></header>
+      <div class="card-stage" id="card-stack"></div>
+      <div class="vote-actions" id="vote-actions"><button class="vote-button vote-button--no" id="btn-no" aria-label="Pass" type="button">×</button><button class="vote-button vote-button--info" id="btn-info" aria-label="Movie details" type="button">i</button><button class="vote-button vote-button--yes" id="btn-yes" aria-label="Like" type="button">♥</button></div>
+      <div class="waiting-state hidden" id="waiting-state"><div class="waiting-orbit"><span></span></div><h2>You’re all caught up</h2><p class="muted">Waiting for the rest of the room to finish.</p><button class="button host-only" id="btn-end-early" type="button">Show results now</button></div>
     </section>
 
+    <section class="screen screen--narrow" id="screen-results">
+      <header class="result-heading"><span class="eyebrow">Tonight’s winner</span><h1>The room has spoken.</h1></header>
+      <article class="winner-card"><img id="winner-poster" alt="Winning movie poster"><div class="winner-shade"></div><div class="winner-content"><span class="status-pill hidden" id="tie-badge">Tie-break winner</span><h2 id="winner-title"></h2><p id="winner-meta"></p><div class="match-score" id="winner-score"></div></div></article>
+      <p class="winner-overview" id="winner-overview"></p><div class="panel"><div class="section-heading"><h2>Group ranking</h2></div><div id="leaderboard" class="leaderboard"></div></div>
+      <div class="result-actions"><button class="button button--primary host-only" id="btn-restart" type="button">Run another round</button><button class="button" id="btn-result-exit" type="button">Back to start</button></div>
+    </section>
   </main>
 
-  <!-- MODAL: HOST ROOM SETUP -->
-  <div id="modal-filters" class="modal-backdrop">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2 class="title-section">Room Preferences</h2>
-        <button class="modal-close-btn close-modal" aria-label="Close modal">&times;</button>
-      </div>
+  <div class="modal" id="filter-modal" aria-hidden="true"><div class="modal-card"><div class="modal-head"><div><p class="kicker">Curate the deck</p><h2 id="filter-modal-title">Room settings</h2></div><button class="icon-button modal-close" type="button" aria-label="Close">×</button></div>
+    <form id="filter-form" class="form-stack"><label>Region<select id="filter-region"><option value="IN">India</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option></select></label><fieldset><legend>Streaming services</legend><div class="chip-grid" id="provider-list"></div></fieldset><fieldset><legend>Genres</legend><div class="chip-grid" id="genre-list"></div></fieldset><label>Minimum rating <span id="rating-value">6.0+</span><input id="rating-range" type="range" min="0" max="9" step="0.5" value="6"></label><div class="field-grid"><label>From year<input id="year-from" type="number" min="1900" max="2100" placeholder="Any"></label><label>To year<input id="year-to" type="number" min="1900" max="2100" placeholder="Any"></label></div><fieldset><legend>Cards per player</legend><div class="segmented card-counts"><button type="button" data-count="10">10</button><button class="active" type="button" data-count="15">15</button><button type="button" data-count="25">25</button></div></fieldset><label class="preset-name-row hidden" id="preset-name-row">Preset name<input id="preset-name" maxlength="80" placeholder="Friday favorites"></label><button class="button button--primary button--wide" id="filter-submit" type="submit">Save settings</button></form>
+  </div></div>
 
-      <div class="form-group">
-        <label class="form-label" for="filter-region-select">Region & Providers</label>
-        <select id="filter-region-select" class="form-input" style="margin-bottom: var(--space-8);">
-          <option value="IN">🇮🇳 India (Netflix, Prime, JioHotstar, Apple TV+)</option>
-          <option value="US">🇺🇸 United States (Netflix, Max, Hulu, Disney+)</option>
-          <option value="GB">🇬🇧 United Kingdom (BBC iPlayer, NOW, Netflix)</option>
-        </select>
-        <div id="filter-providers-list" class="chip-grid">
-          <!-- Dynamically populated chips -->
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Movie Genres</label>
-        <div id="filter-genres-list" class="chip-grid" style="max-height: 140px; overflow-y: auto;">
-          <!-- Dynamically populated chips -->
-        </div>
-      </div>
-
-      <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label class="form-label" style="margin: 0;">Minimum Rating</label>
-          <span id="filter-rating-val" class="badge badge--rating">⭐ 6.0+</span>
-        </div>
-        <input type="range" id="filter-rating-slider" class="range-input" min="5.0" max="8.5" step="0.5" value="6.0" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Cards in Deck</label>
-        <div class="chip-grid" style="display: grid; grid-template-columns: repeat(3, 1fr);">
-          <button type="button" class="chip card-count-btn" data-count="10">10</button>
-          <button type="button" class="chip card-count-btn active" data-count="15">15</button>
-          <button type="button" class="chip card-count-btn" data-count="20">20</button>
-        </div>
-      </div>
-
-      <button id="btn-confirm-filters" class="btn btn--primary" type="button" style="margin-top: var(--space-12);">
-        Enter Lobby
-      </button>
-    </div>
-  </div>
-
-  <!-- MODAL: MOVIE DETAIL SYNOPSIS -->
-  <div id="modal-detail" class="modal-backdrop">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2 id="detail-title" class="title-section">Movie Details</h2>
-        <button class="modal-close-btn close-modal" aria-label="Close modal">&times;</button>
-      </div>
-      <div style="display: flex; gap: var(--space-8); align-items: center; margin-bottom: var(--space-12);">
-        <span id="detail-rating" class="badge badge--rating">⭐ 8.0</span>
-        <span id="detail-year" class="text-caption">2023</span>
-      </div>
-      <div class="text-caption" style="margin-bottom: var(--space-8); color: var(--color-info);">
-        Streaming on: <span id="detail-providers" style="color: var(--text-primary); font-weight: 600;"></span>
-      </div>
-      <div class="text-caption" style="margin-bottom: var(--space-16);">
-        Genres: <span id="detail-genres" style="color: var(--text-primary); font-weight: 600;"></span>
-      </div>
-      <div class="form-label">Plot Synopsis</div>
-      <p id="detail-overview" class="text-subtitle" style="line-height: 1.6;"></p>
-    </div>
-  </div>
-
-  <!-- JS Dependencies -->
-  <script src="/static/js/swipe.js"></script>
-  <script src="/static/js/app.js"></script>
+  <div class="modal" id="detail-modal" aria-hidden="true"><div class="modal-card"><div class="modal-head"><div><p class="kicker">Movie details</p><h2 id="detail-title"></h2></div><button class="icon-button modal-close" type="button" aria-label="Close">×</button></div><p class="detail-meta" id="detail-meta"></p><p class="muted" id="detail-overview"></p></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/static/js/swipe.js"></script><script src="/static/js/app.js"></script>
 </body>
 </html>
