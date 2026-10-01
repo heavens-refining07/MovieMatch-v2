@@ -146,7 +146,7 @@ async def warmup_cache():
 
         # Store per-genre results immediately so partial cache is usable
         _genre_cache[genre_id] = genre_movies
-        logger.info(f"  Cached {len(genre_movies)} movies for genre '{genre_name}' ({genre_id})")
+        TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
 
     _cache_ready = True
     total = sum(len(v) for v in _genre_cache.values())
