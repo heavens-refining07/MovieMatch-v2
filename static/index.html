@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#09090f">
+  <meta name="theme-color" content="#ffffff">
   <title>MovieMatch — Decide together</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,46 +11,53 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-  <div class="ambient ambient--one"></div><div class="ambient ambient--two"></div>
   <nav class="topbar">
-    <button class="brand" id="brand-home" type="button" aria-label="MovieMatch home"><span class="brand-mark">M</span><span>MovieMatch</span></button>
+    <button class="brand" id="brand-home" type="button" aria-label="MovieMatch home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>MovieMatch</span><span class="version-badge">V2</span></button>
+    <div class="topbar-links"><button type="button" data-screen="welcome">Home</button><button type="button" id="nav-how">How it works</button></div>
     <div class="topbar-actions">
-      <button class="button button--quiet" id="nav-join" type="button">Join a room</button>
-      <button class="button button--small" id="nav-host" type="button">Host sign in</button>
+      <button class="button" id="nav-join" type="button">Join room</button>
+      <button class="button button--primary button--small" id="nav-host" type="button">Host sign in</button>
       <button class="button button--quiet hidden" id="nav-dashboard" type="button">Dashboard</button>
     </div>
   </nav>
 
   <main class="app-shell">
     <section class="screen active" id="screen-welcome">
-      <div class="hero-copy">
-        <span class="eyebrow"><span class="live-dot"></span> The group movie picker</span>
-        <h1>Less debating.<br><span>More watching.</span></h1>
-        <p>One host sets the vibe. Everyone swipes. MovieMatch finds the film your whole group can get behind.</p>
-        <div class="trust-row"><span>No guest accounts</span><span>Live group progress</span><span>One clear winner</span></div>
+      <div class="hero-layout">
+        <div class="hero-copy">
+          <span class="eyebrow">Movie night, solved.</span>
+          <h1>Pick a movie<br>everyone wants<br>to watch.</h1>
+          <p>Create a room, invite your friends, swipe through movies, and let MovieMatch reveal your group’s top pick.</p>
+          <div class="hero-actions"><button class="button button--primary" id="welcome-host" type="button"><span aria-hidden="true">＋</span> Create a room</button><button class="button" id="welcome-join" type="button">Join a room</button></div>
+          <div class="trust-row"><span><b>No guest accounts</b><small>Start in seconds</small></span><span><b>Live group matching</b><small>Everyone finishes their deck</small></span><span><b>One winner</b><small>Chosen from the top-liked movies</small></span></div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="poster-shell poster-shell--left"><img src="/static/assets/poster-orbit.svg" alt=""><span class="poster-label">DISCOVER</span></div>
+          <div class="poster-shell poster-shell--right"><img src="/static/assets/poster-neon-run.svg" alt=""><span class="poster-label">TOGETHER</span></div>
+          <div class="poster-shell poster-shell--main"><img src="/static/assets/poster-desert-echo.svg" alt=""><div class="poster-copy"><div class="poster-symbol">▶</div><strong>Movie night</strong><small>Swipe. Match. Watch.</small></div></div>
+        </div>
       </div>
-      <div class="entry-grid">
-        <article class="panel panel--join">
-          <div class="panel-icon">↗</div><p class="kicker">Joining friends?</p>
-          <h2>Enter the room</h2><p class="muted">All you need is a code and a nickname.</p>
+      <section class="join-section" id="join-section">
+        <article class="panel panel--join focused-form">
+          <div class="panel-icon" aria-hidden="true">♟</div><p class="kicker">No account needed</p>
+          <h2>Join a room</h2><p class="muted">Enter the 4-digit code from your friend and choose a nickname.</p>
           <form id="join-form" class="form-stack">
             <label>Room code<input id="join-code" inputmode="numeric" autocomplete="one-time-code" maxlength="4" placeholder="4-digit code" required></label>
             <label>Nickname<input id="join-name" maxlength="24" autocomplete="nickname" placeholder="How friends know you" required></label>
-            <button class="button button--primary button--wide" type="submit">Join room <span>→</span></button>
+            <button class="button button--primary button--wide" type="submit">Join room</button>
           </form>
         </article>
-        <article class="panel panel--host">
-          <div class="panel-icon">★</div><p class="kicker">Planning movie night?</p>
-          <h2>Host the room</h2><p class="muted">Sign in to create rooms, save presets, and revisit every winner.</p>
-          <ul class="feature-list"><li>Reusable streaming and genre presets</li><li>Secure host-only room controls</li><li>Room history and past winners</li></ul>
-          <button class="button button--wide" id="welcome-host" type="button">Open host dashboard <span>→</span></button>
-        </article>
-      </div>
+      </section>
+      <section class="how-section" id="how-it-works"><div class="section-intro"><span class="eyebrow">Three simple steps</span><h2>How MovieMatch works</h2><p class="muted">From room code to movie night without the group-chat debate.</p></div><div class="how-grid">
+        <article class="how-card"><span>1</span><svg class="how-illustration" viewBox="0 0 220 130" aria-hidden="true"><rect x="141" y="20" width="58" height="74" rx="10" fill="#fff" stroke="#111" stroke-width="4"/><path d="M170 38v38M151 57h38" stroke="#111" stroke-width="6" stroke-linecap="round"/><circle cx="54" cy="51" r="20" fill="#f2bd8f" stroke="#111" stroke-width="4"/><circle cx="105" cy="43" r="23" fill="#8dc9e8" stroke="#111" stroke-width="4"/><circle cx="84" cy="72" r="24" fill="#c5a7ea" stroke="#111" stroke-width="4"/><path d="M23 116q5-41 31-41t33 41M73 116q4-45 32-45t34 45M52 116q4-34 31-34t34 34" fill="#fff" stroke="#111" stroke-width="4"/></svg><h3>Create a room</h3><p>Hosts sign in, set the filters, and share a four-digit code.</p></article>
+        <article class="how-card"><span>2</span><svg class="how-illustration" viewBox="0 0 220 130" aria-hidden="true"><g transform="rotate(-10 69 67)"><rect x="34" y="14" width="70" height="105" rx="13" fill="#fff" stroke="#111" stroke-width="4"/><rect x="43" y="27" width="52" height="70" rx="5" fill="#ffd36a"/><path d="m69 49 6 12 14 2-10 10 2 14-12-7-12 7 2-14-10-10 14-2Z" fill="#111"/></g><g transform="rotate(10 151 67)"><rect x="116" y="14" width="70" height="105" rx="13" fill="#fff" stroke="#111" stroke-width="4"/><rect x="125" y="27" width="52" height="70" rx="5" fill="#ff8f8f"/><path d="M151 82c-23-14-25-32-15-38 7-5 13 0 15 5 3-5 9-10 16-5 10 6 8 24-16 38Z" fill="#111"/></g><path d="M91 111h38" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg><h3>Swipe together</h3><p>Friends join with a nickname and finish their own movie deck.</p></article>
+        <article class="how-card"><span>3</span><svg class="how-illustration" viewBox="0 0 220 130" aria-hidden="true"><path d="M77 18h66v22c0 34-14 52-33 52S77 74 77 40Z" fill="#ffd34f" stroke="#111" stroke-width="4"/><path d="M78 30H51q0 38 36 43M142 30h27q0 38-36 43M110 92v18M81 117h58" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/><path d="m110 33 7 14 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2Z" fill="#111"/><path d="m42 13 3 8 8 3-8 3-3 8-3-8-8-3 8-3Zm137 75 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z" fill="#111"/></svg><h3>Reveal the winner</h3><p>After everyone finishes, one of the highest-liked movies wins.</p></article>
+      </div></section>
     </section>
 
     <section class="screen screen--narrow" id="screen-auth">
       <button class="back-link" data-screen="welcome" type="button">← Back</button>
-      <div class="auth-card">
+      <div class="auth-layout"><div class="auth-card">
         <span class="eyebrow">For hosts</span><h1 id="auth-title">Welcome back</h1><p class="muted" id="auth-copy">Sign in to create and manage movie rooms.</p>
         <div class="segmented"><button class="active" id="tab-login" type="button">Sign in</button><button id="tab-register" type="button">Create account</button></div>
         <form id="auth-form" class="form-stack">
@@ -61,7 +68,7 @@
           <button class="button button--primary button--wide" id="auth-submit" type="submit">Sign in</button>
         </form>
         <p class="privacy-note">Guest players never need an account. Host sessions use a secure, HttpOnly cookie.</p>
-      </div>
+      </div><div class="auth-visual" aria-hidden="true"><div class="poster-shell poster-shell--left"><img src="/static/assets/poster-orbit.svg" alt=""></div><div class="poster-shell poster-shell--right"><img src="/static/assets/poster-neon-run.svg" alt=""></div><div class="poster-shell poster-shell--main"><img src="/static/assets/poster-desert-echo.svg" alt=""><div class="poster-copy"><div class="poster-symbol">★</div><strong>Good movies bring people together.</strong></div></div></div></div>
     </section>
 
     <section class="screen" id="screen-dashboard">
@@ -91,22 +98,21 @@
     </section>
 
     <section class="screen screen--game" id="screen-voting">
-      <header class="game-head"><span class="status-pill" id="deck-progress">1 / 15</span><span class="eyebrow">Swipe your picks</span><span class="status-pill" id="friends-progress">0 finished</span></header>
+      <header class="game-head"><div class="game-room"><span class="live-dot"></span><strong id="game-room-title">Movie night</strong></div><div class="game-players" id="game-players" aria-label="Room participants"></div><span class="status-pill" id="deck-progress">1 / 15</span></header>
       <div class="card-stage" id="card-stack"></div>
       <div class="vote-actions" id="vote-actions"><button class="vote-button vote-button--no" id="btn-no" aria-label="Pass" type="button">×</button><button class="vote-button vote-button--info" id="btn-info" aria-label="Movie details" type="button">i</button><button class="vote-button vote-button--yes" id="btn-yes" aria-label="Like" type="button">♥</button></div>
-      <div class="waiting-state hidden" id="waiting-state"><div class="waiting-orbit"><span></span></div><h2>You’re all caught up</h2><p class="muted">Waiting for the rest of the room to finish.</p><button class="button host-only" id="btn-end-early" type="button">Show results now</button></div>
+      <div class="waiting-state hidden" id="waiting-state"><div class="waiting-orbit"><span></span></div><h2 id="waiting-title">You’re all caught up</h2><p class="muted" id="waiting-copy">Waiting for the rest of the room to finish.</p><button class="button button--primary host-only" id="btn-end-early" type="button">Start a new round</button></div>
     </section>
 
-    <section class="screen screen--narrow" id="screen-results">
-      <header class="result-heading"><span class="eyebrow">Tonight’s winner</span><h1>The room has spoken.</h1></header>
-      <article class="winner-card"><img id="winner-poster" alt="Winning movie poster"><div class="winner-shade"></div><div class="winner-content"><span class="status-pill hidden" id="tie-badge">Tie-break winner</span><h2 id="winner-title"></h2><p id="winner-meta"></p><div class="match-score" id="winner-score"></div></div></article>
-      <p class="winner-overview" id="winner-overview"></p><div class="panel"><div class="section-heading"><h2>Group ranking</h2></div><div id="leaderboard" class="leaderboard"></div></div>
-      <div class="result-actions"><button class="button button--primary host-only" id="btn-restart" type="button">Run another round</button><button class="button" id="btn-result-exit" type="button">Back to start</button></div>
+    <section class="screen" id="screen-results">
+      <div class="result-confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <header class="result-heading"><span class="match-mark" aria-hidden="true">★</span><div><span class="eyebrow">The votes are in</span><h1>Tonight’s winner!</h1><p>Everyone finished. Your group’s top choice is ready.</p></div></header>
+      <div class="result-layout"><div class="winner-poster-frame"><span class="winner-crown" aria-hidden="true">★</span><img id="winner-poster" alt="Winning movie poster"></div><article class="result-copy"><span class="eyebrow">Your group’s pick</span><h2 id="winner-title"></h2><p class="winner-meta" id="winner-meta"></p><p class="winner-overview" id="winner-overview"></p><div class="result-actions"><button class="button button--primary host-only" id="btn-restart" type="button">Start a new round</button><button class="button" id="btn-result-exit" type="button">Back to start</button></div></article></div>
     </section>
   </main>
 
   <div class="modal" id="filter-modal" aria-hidden="true"><div class="modal-card"><div class="modal-head"><div><p class="kicker">Curate the deck</p><h2 id="filter-modal-title">Room settings</h2></div><button class="icon-button modal-close" type="button" aria-label="Close">×</button></div>
-    <form id="filter-form" class="form-stack"><label>Region<select id="filter-region"><option value="IN">India</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option></select></label><fieldset><legend>Streaming services</legend><div class="chip-grid" id="provider-list"></div></fieldset><fieldset><legend>Genres</legend><div class="chip-grid" id="genre-list"></div></fieldset><label>Minimum rating <span id="rating-value">6.0+</span><input id="rating-range" type="range" min="0" max="9" step="0.5" value="6"></label><div class="field-grid"><label>From year<input id="year-from" type="number" min="1900" max="2100" placeholder="Any"></label><label>To year<input id="year-to" type="number" min="1900" max="2100" placeholder="Any"></label></div><fieldset><legend>Cards per player</legend><div class="segmented card-counts"><button type="button" data-count="10">10</button><button class="active" type="button" data-count="15">15</button><button type="button" data-count="25">25</button></div></fieldset><label class="preset-name-row hidden" id="preset-name-row">Preset name<input id="preset-name" maxlength="80" placeholder="Friday favorites"></label><button class="button button--primary button--wide" id="filter-submit" type="submit">Save settings</button></form>
+    <form id="filter-form" class="form-stack"><label>Region<select id="filter-region"><option value="IN">India</option><option value="US">United States</option><option value="GB">United Kingdom</option><option value="CA">Canada</option><option value="AU">Australia</option></select></label><fieldset><legend>Streaming services</legend><div class="chip-grid" id="provider-list"></div></fieldset><fieldset><legend>Genres</legend><div class="chip-grid" id="genre-list"></div></fieldset><label>Minimum rating <span id="rating-value">6.0+</span><input id="rating-range" type="range" min="0" max="9" step="0.5" value="6"></label><div class="field-grid"><label>From year<input id="year-from" type="number" min="1900" max="2100" placeholder="Any"></label><label>To year<input id="year-to" type="number" min="1900" max="2100" placeholder="Any"></label></div><fieldset><legend>Cards per player</legend><div class="segmented card-counts"><button type="button" data-count="10">10</button><button class="active" type="button" data-count="15">15</button><button type="button" data-count="25">25</button><button type="button" data-count="custom">Custom</button></div><label class="custom-card-count hidden" id="custom-card-count-row">Custom number<input id="custom-card-count" type="number" inputmode="numeric" min="1" max="100" value="30" placeholder="1–100"><small>Choose between 1 and 100 cards.</small></label></fieldset><label class="preset-name-row hidden" id="preset-name-row">Preset name<input id="preset-name" maxlength="80" placeholder="Friday favorites"></label><button class="button button--primary button--wide" id="filter-submit" type="submit">Save settings</button></form>
   </div></div>
 
   <div class="modal" id="detail-modal" aria-hidden="true"><div class="modal-card"><div class="modal-head"><div><p class="kicker">Movie details</p><h2 id="detail-title"></h2></div><button class="icon-button modal-close" type="button" aria-label="Close">×</button></div><p class="detail-meta" id="detail-meta"></p><p class="muted" id="detail-overview"></p></div></div>
