@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import Dict, List, Optional, Set
 from fastapi import WebSocket
-from app.models import MovieItem, Participant, RoomFilter, GameResult, LeaderboardItem
+from app.models import MovieItem, Participant, RoomFilter, GameResult
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,9 @@ class Room:
         self.dislikes: Dict[int, Set[str]] = {}
         # user_id -> dict of {movie_id: bool}
         self.user_votes: Dict[str, Dict[int, bool]] = {}
+        self.round_participant_ids: Set[str] = set()
         self.last_result: Optional[GameResult] = None
+        self.vote_lock = asyncio.Lock()
 
         # Add initial host participant
         self.participants[host_id] = Participant(
@@ -78,6 +80,7 @@ class Room:
             del self.connections[user_id]
         if user_id in self.participants:
             del self.participants[user_id]
+        self.round_participant_ids.discard(user_id)
         return True
 
     def start_game(self, movies: List[MovieItem]):
@@ -85,22 +88,24 @@ class Room:
         self.state = "voting"
         self.likes = {m.id: set() for m in movies}
         self.dislikes = {m.id: set() for m in movies}
-        self.user_votes = {uid: {} for uid in self.participants}
+        self.round_participant_ids = {
+            uid for uid, participant in self.participants.items() if participant.is_connected
+        }
+        self.user_votes = {uid: {} for uid in self.round_participant_ids}
         self.last_result = None
 
-        for p in self.participants.values():
+        for uid, p in self.participants.items():
             p.voted_count = 0
-            p.total_count = len(movies)
+            p.total_count = len(movies) if uid in self.round_participant_ids else 0
             p.has_finished = False
 
-    def cast_vote(self, user_id: str, movie_id: int, liked: bool) -> bool:
-        """Records vote. Returns True if all active players have finished."""
-        if user_id not in self.participants:
-            return False
+    def cast_vote(self, user_id: str, movie_id: int, liked: bool) -> dict:
+        """Record one immutable vote and finalize only after every player finishes."""
+        if self.state != "voting" or user_id not in self.round_participant_ids or movie_id not in self.likes:
+            return {"accepted": False, "result": self.last_result, "all_finished": False}
 
-        if movie_id not in self.likes:
-            self.likes[movie_id] = set()
-            self.dislikes[movie_id] = set()
+        if movie_id in self.user_votes.get(user_id, {}):
+            return {"accepted": False, "result": self.last_result, "all_finished": False}
 
         if liked:
             self.likes[movie_id].add(user_id)
@@ -118,64 +123,37 @@ class Room:
         if p.voted_count >= len(self.movies):
             p.has_finished = True
 
-        # Check if all currently connected participants have finished
-        connected_players = [p for p in self.participants.values() if p.is_connected]
-        if connected_players and all(p.has_finished for p in connected_players):
-            return True
-        return False
+        all_finished = bool(self.round_participant_ids) and all(
+            self.participants[user_id].has_finished for user_id in self.round_participant_ids
+        )
+        result = self.calculate_results() if all_finished else None
+        return {"accepted": True, "result": result, "all_finished": all_finished}
 
     def calculate_results(self) -> GameResult:
-        leaderboard: List[LeaderboardItem] = []
-        total_voters = len(self.participants)
+        if self.last_result is not None:
+            return self.last_result
+        if self.state != "voting" or not self.round_participant_ids or not all(
+            self.participants[user_id].has_finished for user_id in self.round_participant_ids
+        ):
+            raise RuntimeError("Results are available only after every participant finishes voting.")
 
-        for m in self.movies:
-            liked_user_ids = self.likes.get(m.id, set())
-            disliked_user_ids = self.dislikes.get(m.id, set())
-            likes_count = len(liked_user_ids)
-            dislikes_count = len(disliked_user_ids)
-            total_votes = likes_count + dislikes_count
-            pct = int((likes_count / total_voters) * 100) if total_voters > 0 else 0
-            
-            voter_names = [self.participants[uid].name for uid in liked_user_ids if uid in self.participants]
-            
-            leaderboard.append(LeaderboardItem(
-                movie=m,
-                likes=likes_count,
-                dislikes=dislikes_count,
-                total_votes=total_votes,
-                percentage=pct,
-                voters=voter_names
-            ))
+        participant_ids = set(self.round_participant_ids)
+        like_counts = {
+            movie.id: len(self.likes.get(movie.id, set()) & participant_ids)
+            for movie in self.movies
+        }
+        max_likes = max(like_counts.values(), default=0)
+        tied_candidates = [movie for movie in self.movies if like_counts.get(movie.id, 0) == max_likes]
+        if not tied_candidates:
+            raise RuntimeError("No movies are available for the result.")
 
-        # Sort: 1) Likes DESC, 2) TMDB rating DESC
-        leaderboard.sort(key=lambda item: (item.likes, item.movie.vote_average), reverse=True)
-
-        if not leaderboard:
-            dummy = MovieItem(id=0, title="No movies available")
-            return GameResult(winner=dummy, leaderboard=[])
-
-        max_likes = leaderboard[0].likes
-        # Collect all movies that achieved the top score
-        top_items = [item for item in leaderboard if item.likes == max_likes]
-
-        is_tie_break = False
-        tied_candidates: List[MovieItem] = []
-        
-        if len(top_items) > 1:
-            is_tie_break = True
-            tied_candidates = [item.movie for item in top_items]
-            winner_item = random.choice(top_items)
-            winner = winner_item.movie
-        else:
-            winner = top_items[0].movie
-
+        winner = random.choice(tied_candidates)
         self.last_result = GameResult(
             winner=winner,
-            is_tie_break=is_tie_break,
-            tied_candidates=tied_candidates,
-            total_voters=total_voters,
+            is_tie_break=len(tied_candidates) > 1,
+            tied_candidates=tied_candidates if len(tied_candidates) > 1 else [],
+            total_voters=len(participant_ids),
             max_likes=max_likes,
-            leaderboard=leaderboard
         )
         self.state = "results"
         return self.last_result
@@ -186,6 +164,7 @@ class Room:
         self.likes = {}
         self.dislikes = {}
         self.user_votes = {}
+        self.round_participant_ids = set()
         self.last_result = None
         for p in self.participants.values():
             p.voted_count = 0
@@ -207,13 +186,16 @@ class Room:
             self.remove_connection(uid)
 
     def get_lobby_data(self) -> dict:
-        return {
+        data = {
             "code": self.code,
             "host_id": self.host_id,
             "state": self.state,
             "filters": self.filters.model_dump(),
             "participants": [p.model_dump() for p in self.participants.values()]
         }
+        if self.last_result is not None:
+            data["result"] = self.last_result.model_dump()
+        return data
 
 class RoomManager:
     def __init__(self):

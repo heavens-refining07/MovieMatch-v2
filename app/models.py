@@ -1,5 +1,8 @@
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+RETIRED_PROVIDER_IDS = {122, 220, 232, 237, 2336}
 
 class MovieItem(BaseModel):
     id: int
@@ -32,7 +35,13 @@ class RoomFilter(BaseModel):
     min_rating: float = 6.0
     year_from: Optional[int] = None
     year_to: Optional[int] = None
-    card_count: int = 15
+    card_count: int = Field(default=15, ge=1, le=100)
+
+    @field_validator('provider_ids')
+    @classmethod
+    def remove_retired_providers(cls, provider_ids: List[int]) -> List[int]:
+        """Drop discontinued choices from saved presets and incoming room filters."""
+        return [int(provider_id) for provider_id in provider_ids if int(provider_id) not in RETIRED_PROVIDER_IDS]
 
 class LeaderboardItem(BaseModel):
     movie: MovieItem

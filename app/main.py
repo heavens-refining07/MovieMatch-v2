@@ -337,7 +337,21 @@ async def websocket_endpoint(websocket: WebSocket, code: str, token: str = Query
     except ValueError:
         await websocket.close(code=4001, reason="Invalid participant identity.")
         return
-    await room.broadcast("lobby_update", room.get_lobby_data())
+    if room.state == "results" and room.last_result is not None:
+        await websocket.send_json({"type": "game_results", "data": room.last_result.model_dump()})
+    else:
+        await room.broadcast("lobby_update", room.get_lobby_data())
+        if room.state == "voting":
+            voted_movie_ids = set(room.user_votes.get(user_id, {}))
+            remaining_movies = [movie for movie in room.movies if movie.id not in voted_movie_ids]
+            await websocket.send_json({
+                "type": "game_started",
+                "data": {
+                    "movies": [movie.model_dump() for movie in remaining_movies],
+                    "total_cards": len(room.movies),
+                    "swiped_count": len(voted_movie_ids),
+                },
+            })
 
     try:
         while True:
@@ -375,17 +389,23 @@ async def websocket_endpoint(websocket: WebSocket, code: str, token: str = Query
                 await room.broadcast("game_started", {"movies": [m.model_dump() for m in movies], "total_cards": len(movies)})
 
             elif event_type == "cast_vote" and room.state == "voting":
-                all_finished = room.cast_vote(user_id, payload.get("movie_id"), bool(payload.get("liked")))
-                await room.broadcast("progress_update", {"participants": [p.model_dump() for p in room.participants.values()]})
-                if all_finished:
-                    results = room.calculate_results().model_dump()
-                    persist_room_result(room, results)
+                async with room.vote_lock:
+                    outcome = room.cast_vote(user_id, payload.get("movie_id"), bool(payload.get("liked")))
+                    result = outcome["result"]
+                    if outcome["accepted"] and result is not None:
+                        results = result.model_dump()
+                        persist_room_result(room, results)
+                    else:
+                        results = None
+                if not outcome["accepted"]:
+                    continue
+                if results is not None:
                     await room.broadcast("game_results", results)
+                else:
+                    await room.broadcast("progress_update", {"participants": [p.model_dump() for p in room.participants.values()]})
 
             elif event_type == "end_session" and is_host and room.state == "voting":
-                results = room.calculate_results().model_dump()
-                persist_room_result(room, results)
-                await room.broadcast("game_results", results)
+                await websocket.send_json({"type": "error", "data": {"message": "Everyone must finish their deck before the winner is revealed."}})
 
             elif event_type == "restart_game" and is_host:
                 room.restart_game()
@@ -400,13 +420,7 @@ async def websocket_endpoint(websocket: WebSocket, code: str, token: str = Query
         if room.state == "lobby":
             await room.broadcast("lobby_update", room.get_lobby_data())
         elif room.state == "voting":
-            connected = [p for p in room.participants.values() if p.is_connected]
-            if connected and all(p.has_finished for p in connected):
-                results = room.calculate_results().model_dump()
-                persist_room_result(room, results)
-                await room.broadcast("game_results", results)
-            else:
-                await room.broadcast("progress_update", {"participants": [p.model_dump() for p in room.participants.values()]})
+            await room.broadcast("progress_update", {"participants": [p.model_dump() for p in room.participants.values()]})
     except Exception as exc:
         logger.exception("WebSocket error: %s", exc)
         room.remove_connection(user_id)
