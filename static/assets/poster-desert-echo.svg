@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Desert Echo poster</title>
+  <desc id="desc">An original illustrated adventure poster with a vast orange desert and two travelers.</desc>
+  <defs><linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#38151a"/><stop offset=".52" stop-color="#e25e1b"/><stop offset="1" stop-color="#f0ad3d"/></linearGradient></defs>
+  <rect width="600" height="900" fill="url(#sunset)"/>
+  <circle cx="300" cy="286" r="168" fill="#ffbd52" opacity=".86"/>
+  <path d="M0 555q180-88 352 12t248 0v333H0Z" fill="#a93e18"/>
+  <path d="M0 665q166-88 332 9t268-19v245H0Z" fill="#6f2618"/>
+  <path d="M0 755q170-58 322 7t278-8v146H0Z" fill="#30171a"/>
+  <g fill="#241319"><circle cx="243" cy="481" r="29"/><path d="M210 620q3-112 33-112t35 112Z"/><circle cx="348" cy="517" r="24"/><path d="M320 635q4-91 29-91t31 91Z"/></g>
+  <path d="M65 180h120M420 145h120" stroke="#ffe0a1" stroke-width="4" opacity=".45"/>
+  <text x="50" y="785" fill="#ffe7b7" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="7">THE HORIZON REMEMBERS</text>
+  <text x="50" y="854" fill="#fff" font-family="Arial, sans-serif" font-size="66" font-weight="900">DESERT ECHO</text>
+</svg>

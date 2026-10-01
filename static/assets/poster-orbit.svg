@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Midnight Orbit poster</title>
+  <desc id="desc">An original illustrated science-fiction poster with a lone astronaut and a glowing planet.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#07142e"/><stop offset=".55" stop-color="#153e64"/><stop offset="1" stop-color="#06080f"/></linearGradient>
+    <radialGradient id="planet"><stop stop-color="#d9f4ff"/><stop offset=".45" stop-color="#70b7d4"/><stop offset="1" stop-color="#18314f"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="600" height="900" fill="url(#sky)"/>
+  <circle cx="410" cy="265" r="154" fill="#9ddfff" opacity=".32" filter="url(#glow)"/>
+  <circle cx="410" cy="265" r="126" fill="url(#planet)"/>
+  <path d="M0 640 Q155 555 316 639 T600 618V900H0Z" fill="#0b111d"/>
+  <path d="M0 690 Q170 622 350 690 T600 660V900H0Z" fill="#141f2b"/>
+  <g fill="#fff" opacity=".75"><circle cx="75" cy="110" r="3"/><circle cx="160" cy="225" r="2"/><circle cx="278" cy="90" r="3"/><circle cx="535" cy="105" r="2"/><circle cx="78" cy="385" r="2"/></g>
+  <g transform="translate(210 510)"><ellipse cx="78" cy="168" rx="58" ry="18" fill="#000" opacity=".35"/><rect x="51" y="66" width="54" height="92" rx="22" fill="#e8edf0"/><rect x="43" y="54" width="70" height="60" rx="25" fill="#c8d5dc"/><path d="M55 72Q78 54 101 72v24H55Z" fill="#153e64"/><path d="M50 100 21 140M106 100l30 40M64 153l-9 54M94 153l10 54" stroke="#e8edf0" stroke-width="17" stroke-linecap="round"/></g>
+  <text x="48" y="760" fill="#fff" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="7">BEYOND THE QUIET</text>
+  <text x="48" y="826" fill="#fff" font-family="Arial, sans-serif" font-size="58" font-weight="900">MIDNIGHT</text>
+  <text x="48" y="875" fill="#8fd8f4" font-family="Arial, sans-serif" font-size="58" font-weight="900">ORBIT</text>
+</svg>
