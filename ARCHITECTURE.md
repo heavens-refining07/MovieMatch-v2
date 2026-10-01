@@ -2,7 +2,7 @@
 
 ## Goals and boundaries
 
-Only hosts have accounts. An authenticated host creates and owns rooms, controls filters, removes guests, starts or ends voting, and restarts a round. Guests join through a room code or share link, choose a nickname, and receive a short-lived signed connection pass. They do not create accounts and cannot obtain host permissions by changing browser storage or URL values.
+Only hosts have accounts. An authenticated host creates and owns rooms, controls filters, removes guests, starts voting, and explicitly restarts a round. Guests join through a room code or share link, choose a nickname, and receive a short-lived signed connection pass. They do not create accounts and cannot obtain host permissions by changing browser storage or URL values.
 
 The existing FastAPI, WebSocket, TMDB, and vanilla frontend structure remains intact. Durable host data lives in SQL; live swipe coordination remains in memory for now.
 
@@ -64,22 +64,24 @@ Future hardening: email verification, password reset, login throttling, session 
 2. The host receives a signed room pass with role `host`. The WebSocket accepts it only if the host session cookie belongs to the room owner.
 3. A guest submits a nickname to `/api/rooms/{code}/join` and receives a signed room pass with role `guest` and a random participant ID.
 4. The WebSocket reads identity and role from the signed pass, never from a client-controlled local-storage ID.
-5. Every privileged socket event checks the server-established host role. Filter changes, kicks, start, early results, and restart are host-only.
-6. Starting and completing a round updates the durable room record. The dashboard reads this history even after the live connection closes.
+5. Every privileged socket event checks the server-established host role. Filter changes, kicks, start, and restart are host-only.
+6. Votes stay private while every participant completes the full deck. A disconnected participant remains part of the round and can reconnect to finish rather than causing an early result.
+7. The final accepted vote calculates every movie's like total while holding the room vote lock. One movie is selected randomly from the highest-liked candidates, and the result is locked so concurrent, duplicate, and late votes cannot replace it.
+8. Starting and completing a round updates the durable room record. The dashboard reads this history even after the live connection closes, and reconnecting participants receive the same finalized result.
 
 ## UI information architecture
 
-- **Welcome:** value proposition plus separate guest and host entry cards.
+- **Welcome:** two-column desktop hero, focused guest join form, compact benefits, and three-step explanation.
 - **Guest join:** room code and nickname in one short form; shared links prefill the code.
 - **Host auth:** focused sign-in/create-account screen explaining that accounts are host-only.
 - **Host dashboard:** create-room card, preset library, and recent room history with winner summaries.
 - **Lobby:** prominent share code, participant presence, room settings, and host controls.
-- **Filter editor:** region, streaming services, genres, rating, year range, and deck size; reused for presets and live rooms.
-- **Swipe arena:** full-bleed poster card, progress indicators, accessible buttons, pointer gestures, and reduced-motion support.
-- **Waiting state:** clear completion state and a host-only early-results action.
-- **Results:** winner hero, match score, overview, ranking, and host restart.
+- **Filter editor:** region, streaming services, genres, rating, year range, fixed deck sizes, and a custom 1–100 card count; reused for presets and live rooms.
+- **Swipe arena:** centered 2:3 poster stack, personal deck progress, participant presence, accessible buttons, pointer gestures, and reduced-motion support.
+- **Waiting state:** confirms that the local deck is complete while the remaining participants finish.
+- **Results:** one 2:3 winner poster, metadata, overview, confetti/card reveal animation, and host restart without exposing aggregate vote totals or rankings.
 
-The visual system uses large type, high-contrast dark surfaces, restrained violet/coral accents, 44px minimum controls, responsive single-column layouts, and safe-area-friendly spacing.
+The visual system uses white and light-gray surfaces, strong black typography, thin neutral borders, restrained shadows, 44px minimum controls, responsive single-column layouts, and safe-area-friendly spacing.
 
 ## Phased implementation plan
 

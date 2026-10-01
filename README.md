@@ -1,6 +1,6 @@
 # MovieMatch
 
-MovieMatch is a mobile-first group movie picker. A signed-in host creates a room, guests join with a four-digit code or link and a nickname, everyone swipes, and the app ranks the group's favorites in real time.
+MovieMatch is a mobile-first group movie picker. A signed-in host creates a room, guests join with a four-digit code or link and a nickname, everyone finishes the same swipe deck, and one of the highest-liked movies becomes the winner. Ties are resolved randomly.
 
 ## What changed in v2
 
@@ -8,7 +8,10 @@ MovieMatch is a mobile-first group movie picker. A signed-in host creates a room
 - Authenticated room ownership and signed room connection passes; browser-controlled IDs no longer grant host powers.
 - Host dashboard with room history and reusable filter presets.
 - Persistent SQLite data locally, configurable for Postgres in deployment.
-- A redesigned responsive interface for joining, hosting, lobbies, swiping, and results.
+- A clean white responsive interface for joining, hosting, lobbies, 2:3 poster swiping, and an animated winner reveal.
+- Retired Disney+ Hotstar/JioCinema/Zee5/SonyLIV choices are removed, including from stale saved presets; Hulu, HBO Max, and Paramount+ are available.
+- Fixed 10/15/25-card options plus a custom 1–100 card deck size.
+- Aggregate room vote totals and rankings stay out of the UI.
 - No API keys in source code or documentation.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the data model, security boundaries, flows, and rollout plan.
@@ -65,7 +68,7 @@ SQLite is ideal for local development. A single-instance deployment can use a pe
 python -m unittest discover -s tests -v
 ```
 
-The API tests cover registration/login, session revocation, preset persistence, authenticated room creation, account-free guest joining, and rejection of host-token use without a host session.
+The tests cover registration/login, session revocation, preset persistence, authenticated room creation, account-free guest joining, rejection of host-token use without a host session, provider cleanup, custom deck validation, wait-for-everyone result timing, randomized top-vote ties, duplicate/late vote handling, and result UI safeguards.
 
 ## Current architecture
 
