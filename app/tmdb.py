@@ -11,7 +11,7 @@ from app.models import MovieItem, RoomFilter
 
 logger = logging.getLogger(__name__)
 
-TMDB_API_KEY = os.getenv("TMDB_API_KEY", "845bec6c276b668f4048ae57ddb1e541")
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
 BASE_URL = "https://api.themoviedb.org/3"
 IMG_BASE = "https://image.tmdb.org/t/p/w500"
 BACKDROP_BASE = "https://image.tmdb.org/t/p/w1280"
@@ -146,7 +146,7 @@ async def warmup_cache():
 
         # Store per-genre results immediately so partial cache is usable
         _genre_cache[genre_id] = genre_movies
-        TMDB_API_KEY = os.getenv("TMDB_API_KEY", "").strip()
+        logger.info(f" Cached {len(genre_movies)} movies for genre '{genre_name}' ({genre_id})")
 
     _cache_ready = True
     total = sum(len(v) for v in _genre_cache.values())
