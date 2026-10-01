@@ -11,7 +11,7 @@ function cardEscape(value) {
 function safePosterUrl(value) {
   return typeof value === "string" && value.startsWith("https://")
     ? value
-    : "https://placehold.co/500x750/181824/f6f3ff?text=No+Poster";
+    : "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 750'%3E%3Crect width='500' height='750' fill='%23ececec'/%3E%3Ccircle cx='250' cy='330' r='54' fill='%23111111'/%3E%3Cpath d='M233 299l62 31-62 31z' fill='white'/%3E%3Ctext x='250' y='430' text-anchor='middle' font-family='Arial,sans-serif' font-size='28' font-weight='700' fill='%23111111'%3ENo poster%3C/text%3E%3C/svg%3E";
 }
 
 class CardSwipeController {
@@ -25,6 +25,7 @@ class CardSwipeController {
     this.startY = 0;
     this.currentX = 0;
     this.currentY = 0;
+    this.active = true;
     this.threshold = 85;
     this.boundPointerDown = this.handlePointerDown.bind(this);
     this.boundPointerMove = this.handlePointerMove.bind(this);
@@ -32,13 +33,14 @@ class CardSwipeController {
   }
 
   init(cardsList) {
+    this.active = true;
     this.cards = cardsList;
     this.renderStack();
   }
 
   renderStack() {
     this.container.innerHTML = "";
-    if (!this.cards || this.cards.length === 0) {
+    if (!this.active || !this.cards || this.cards.length === 0) {
       return;
     }
 
@@ -82,6 +84,11 @@ class CardSwipeController {
           </div>
         </div>
       `;
+
+      const poster = cardEl.querySelector(".movie-poster-img");
+      poster.addEventListener("error", () => {
+        poster.src = safePosterUrl(null);
+      }, { once: true });
 
       this.container.appendChild(cardEl);
     });
@@ -177,7 +184,7 @@ class CardSwipeController {
     setTimeout(() => {
       cardEl.remove();
       this.renderStack();
-      if (this.onSwipeCallback) {
+      if (this.active && this.onSwipeCallback) {
         this.onSwipeCallback(direction === "right", movie);
       }
     }, 250);
@@ -199,5 +206,14 @@ class CardSwipeController {
 
   getCurrentMovie() {
     return this.currentCard ? this.currentCard.movieData : (this.cards[0] || null);
+  }
+
+  destroy() {
+    this.active = false;
+    this.isDragging = false;
+    this.detachListeners(this.currentCard);
+    this.currentCard = null;
+    this.cards = [];
+    this.container.innerHTML = "";
   }
 }
